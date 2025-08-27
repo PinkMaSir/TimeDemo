@@ -1,319 +1,628 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>假时间计算器</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3B82F6',
-                        secondary: '#10B981',
-                        accent: '#8B5CF6',
-                        neutral: '#64748B',
-                        light: '#F1F5F9',
-                        light: '#F1F5F9',
-                        dark: '#1E293B'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                }
+    <style>
+        /* 基础样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f9fafb;
+            color: #1e293b;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        body.dark-mode {
+            background-color: #111827;
+            color: #f3f4f6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        /* 头部样式 */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            transition: padding 0.3s;
+            padding: 1rem 0;
+        }
+        
+        header.dark-mode {
+            background-color: #1f2937;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .nav-link {
+            color: #4b5563;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .dark-mode .nav-link {
+            color: #d1d5db;
+        }
+        
+        .nav-link:hover {
+            color: #3b82f6;
+        }
+        
+        .btn {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .btn:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary {
+            background-color: #10b981;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #059669;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #4b5563;
+        }
+        
+        .dark-mode .mobile-menu-btn {
+            color: #d1d5db;
+        }
+        
+        /* 主内容区样式 */
+        main {
+            padding: 2rem 0;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .dark-mode .card {
+            background-color: #1f2937;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+        
+        .dark-mode .card-title {
+            color: #f3f4f6;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background-color: white;
+            color: #1e293b;
+        }
+        
+        .dark-mode input, 
+        .dark-mode textarea, 
+        .dark-mode select {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: #f3f4f6;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
+        
+        .form-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+        
+        /* 结果区域样式 */
+        .results-container {
+            display: none;
+        }
+        
+        .no-results, .error-message {
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+        }
+        
+        .no-results {
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+        
+        .dark-mode .no-results {
+            background-color: #374151;
+            color: #d1d5db;
+        }
+        
+        .error-message {
+            background-color: #fee2e2;
+            color: #dc2626;
+            display: none;
+        }
+        
+        .dark-mode .error-message {
+            background-color: #450a0a;
+        }
+        
+        .query-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .dark-mode .query-section {
+            border-top-color: #374151;
+        }
+        
+        .query-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .query-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #eff6ff;
+            border-radius: 0.375rem;
+            display: none;
+        }
+        
+        .dark-mode .query-result {
+            background-color: #1e3a8a;
+        }
+        
+        .query-error {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #fee2e2;
+            color: #dc2626;
+            border-radius: 0.375rem;
+            display: none;
+        }
+        
+        .dark-mode .query-error {
+            background-color: #450a0a;
+        }
+        
+        /* 表格样式 */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .dark-mode th, 
+        .dark-mode td {
+            border-bottom-color: #374151;
+        }
+        
+        th {
+            font-weight: 600;
+            background-color: #f8fafc;
+        }
+        
+        .dark-mode th {
+            background-color: #1f2937;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .dark-mode tr:nth-child(even) {
+            background-color: #374151;
+        }
+        
+        .text-primary {
+            color: #3b82f6;
+        }
+        
+        /* 图表样式 */
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin-top: 1.5rem;
+        }
+        
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .chart-grid {
+            stroke: #e5e7eb;
+            stroke-width: 1;
+        }
+        
+        .dark-mode .chart-grid {
+            stroke: #374151;
+        }
+        
+        .chart-line {
+            stroke: #3b82f6;
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .chart-area {
+            fill: rgba(59, 130, 246, 0.1);
+        }
+        
+        .chart-point {
+            fill: #3b82f6;
+        }
+        
+        .chart-axis {
+            stroke: #9ca3af;
+            stroke-width: 1;
+        }
+        
+        .dark-mode .chart-axis {
+            stroke: #6b7280;
+        }
+        
+        .chart-label {
+            font-size: 12px;
+            fill: #6b7280;
+            text-anchor: middle;
+        }
+        
+        .dark-mode .chart-label {
+            fill: #d1d5db;
+        }
+        
+        .chart-title {
+            font-size: 14px;
+            font-weight: 600;
+            fill: #1f2937;
+        }
+        
+        .dark-mode .chart-title {
+            fill: #f3f4f6;
+        }
+        
+        /* 帮助模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 0.5rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+        
+        .dark-mode .modal {
+            background-color: #1f2937;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-content p {
+            margin-bottom: 1rem;
+        }
+        
+        .modal-close {
+            margin-top: 1rem;
+            text-align: right;
+        }
+        
+        /* 页脚样式 */
+        footer {
+            background-color: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+        
+        .dark-mode footer {
+            background-color: #1f2937;
+            border-top-color: #374151;
+        }
+        
+        .footer-content {
+            text-align: center;
+            color: #6b7280;
+        }
+        
+        .dark-mode .footer-content {
+            color: #9ca3af;
+        }
+        
+        /* 移动端样式 */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background-color: white;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                padding: 1rem;
+                gap: 0.5rem;
+            }
+            
+            .dark-mode .nav-links {
+                background-color: #1f2937;
+            }
+            
+            .nav-links.show {
+                display: flex;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .query-group {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
-    </script>
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
+        
+        /* 动画效果 */
+        .animate-pulse {
+            animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
             }
-            .card-shadow {
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            }
-            .input-focus {
-                @apply focus:ring-2 focus:ring-primary/50 focus:border-primary focus:outline-none;
-            }
-            .btn-hover {
-                @apply hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300;
-            }
-            .chart-grid {
-                stroke: #e5e7eb;
-                stroke-width: 1;
-            }
-            .chart-line {
-                stroke: #3B82F6;
-                stroke-width: 2;
-                fill: none;
-            }
-            .chart-area {
-                fill: rgba(59, 130, 246, 0.1);
-            }
-            .chart-point {
-                fill: #3B82F6;
-            }
-            .chart-axis {
-                stroke: #9ca3af;
-                stroke-width: 1;
-            }
-            .chart-label {
-                font-size: 12px;
-                fill: #6b7280;
-                text-anchor: middle;
-            }
-            .chart-title {
-                font-size: 14px;
-                font-weight: 600;
-                fill: #1f2937;
+            50% {
+                opacity: 0.5;
             }
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans text-dark">
-    <!-- 顶部导航 -->
-    <header class="bg-white shadow-md sticky top-0 z-50 transition-all duration-300">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <i class="fa fa-calculator text-primary text-2xl"></i>
-                <h1 class="text-xl md:text-2xl font-bold text-dark">假时间计算器</h1>
-            </div>
-            <div class="hidden md:flex items-center space-x-4">
-                <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                    <i class="fa fa-moon-o text-neutral"></i>
+<body>
+    <header id="header">
+        <div class="container header-content">
+            <div class="logo">假时间计算器</div>
+            <button id="mobileMenuBtn" class="mobile-menu-btn">
+                ☰
+            </button>
+            <nav class="nav-links" id="mobileMenu">
+                <a href="#" class="nav-link" id="helpBtn">帮助</a>
+                <button class="nav-link" id="themeToggle">
+                    <span id="themeIcon">🌙</span>
                 </button>
-                <button id="helpBtn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                    <i class="fa fa-question text-neutral"></i>
-                </button>
-            </div>
-            <button class="md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors" id="mobileMenuBtn">
-                <i class="fa fa-bars text-neutral"></i>
-            </button>
-        </div>
-        <!-- 移动端菜单 -->
-        <div id="mobileMenu" class="hidden md:hidden bg-white border-t px-4 py-2">
-            <button id="mobileThemeToggle" class="w-full text-left p-2 hover:bg-gray-100 rounded">
-                <i class="fa fa-moon-o mr-2 text-neutral"></i> 切换主题
-            </button>
-            <button id="mobileHelpBtn" class="w-full text-left p-2 hover:bg-gray-100 rounded">
-                <i class="fa fa-question mr-2 text-neutral"></i> 帮助
-            </button>
+            </nav>
         </div>
     </header>
 
-    <!-- 主内容区 -->
-    <main class="container mx-auto px-4 py-8 max-w-6xl">
-        <!-- 介绍卡片 -->
-        <div class="bg-white rounded-xl p-6 mb-8 card-shadow transform hover:shadow-xl transition-shadow">
-            <h2 class="text-xl font-semibold mb-3 text-primary">关于假时间计算</h2>
-            <p class="text-neutral mb-4">
-                假时间计算是用于工程领域的重要计算，特别是在涉及气体流动和储层分析的应用中。
-                本工具可以根据输入的时间点、气体粘度和压缩系数，计算出相应的假时间值。
-            </p>
-            <div class="flex items-center text-sm text-neutral">
-                <i class="fa fa-info-circle mr-2"></i>
-                <span>请输入空格分隔的数值序列，例如：0.00 0.25 0.50 0.75</span>
-            </div>
+    <main class="container">
+        <div class="card">
+            <h2 class="card-title">输入参数</h2>
+            <form id="calculatorForm">
+                <div class="form-group">
+                    <label for="timePoints">时间点 (小时)，用空格分隔</label>
+                    <textarea id="timePoints" rows="3" placeholder="例如: 0 0.25 0.5 ..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="gasViscosity">气体粘度 (mPa·s)，用空格分隔，与时间点一一对应</label>
+                    <textarea id="gasViscosity" rows="3" placeholder="例如: 0.0144 0.01536 0.01596 ..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="compressibility">压缩系数 (MPa⁻¹)，用空格分隔，与时间点一一对应</label>
+                    <textarea id="compressibility" rows="3" placeholder="例如: 0.1244 0.0991 0.08657 ..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn">计算假时间</button>
+                    <button type="button" class="btn btn-secondary" id="loadExampleBtn">加载示例数据</button>
+                </div>
+            </form>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- 输入区域 -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-xl p-6 card-shadow h-full">
-                    <h2 class="text-xl font-semibold mb-6 text-primary flex items-center">
-                        <i class="fa fa-pencil-square-o mr-2"></i>输入参数
-                    </h2>
-                    
-                    <form id="calculatorForm" class="space-y-6">
-                        <div>
-                            <label for="timePoints" class="block text-sm font-medium text-gray-700 mb-1">
-                                时间点（小时）
-                            </label>
-                            <input 
-                                type="text" 
-                                id="timePoints" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus"
-                                placeholder="例如：0.00 0.25 0.50 0.75"
-                                required
-                            >
-                        </div>
-                        
-                        <div>
-                            <label for="gasViscosity" class="block text-sm font-medium text-gray-700 mb-1">
-                                气体粘度（mPa·s）
-                            </label>
-                            <input 
-                                type="text" 
-                                id="gasViscosity" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus"
-                                placeholder="例如：0.02 0.021 0.022 0.023"
-                                required
-                            >
-                        </div>
-                        
-                        <div>
-                            <label for="compressibility" class="block text-sm font-medium text-gray-700 mb-1">
-                                压缩系数（MPa⁻¹）
-                            </label>
-                            <input 
-                                type="text" 
-                                id="compressibility" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg input-focus"
-                                placeholder="例如：0.001 0.0011 0.0012 0.0013"
-                                required
-                            >
-                        </div>
-                        
-                        <button 
-                            type="submit" 
-                            class="w-full bg-primary text-white py-3 px-4 rounded-lg font-medium btn-hover flex items-center justify-center"
-                        >
-                            <i class="fa fa-calculator mr-2"></i> 计算假时间
-                        </button>
-                    </form>
+        <div id="noResultsMessage" class="no-results">
+            请输入数据并点击"计算假时间"按钮
+        </div>
+
+        <div id="errorMessage" class="error-message">
+            <span id="errorText"></span>
+        </div>
+
+        <div id="resultsContainer" class="results-container">
+            <div class="card">
+                <h2 class="card-title">计算结果</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>时间 t (h)</th>
+                                <th>时间间隔 dt (h)</th>
+                                <th>时间间隔 dt (s)</th>
+                                <th>A = 1/(μ·C)</th>
+                                <th>B值</th>
+                                <th>C'值</th>
+                                <th>假时间 tₐ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody">
+                            <!-- 结果将在这里动态填充 -->
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-            
-            <!-- 结果和查询区域 -->
-            <div class="lg:col-span-2 space-y-8">
-                <!-- 结果展示 -->
-                <div class="bg-white rounded-xl p-6 card-shadow">
-                    <h2 class="text-xl font-semibold mb-6 text-primary flex items-center">
-                        <i class="fa fa-table mr-2"></i>计算结果
-                    </h2>
-                    
-                    <div id="resultsContainer" class="hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead>
-                                    <tr>
-                                        <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg">时间点 (h)</th>
-                                        <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">时间间隔 (h)</th>
-                                        <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">时间间隔 (s)</th>
-                                        <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">A值</th>
-                                        <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">B值</th>
-                                        <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">C'值</th>
-                                        <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tr-lg">假时间</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="resultsTableBody" class="bg-white divide-y divide-gray-200">
-                                    <!-- 结果将通过JavaScript动态填充 -->
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- 图表展示 (使用原生SVG) -->
-                        <div class="mt-8">
-                            <h3 class="text-lg font-medium mb-4">假时间与实际时间关系图</h3>
-                            <div class="h-64 md:h-80 border border-gray-200 rounded-lg overflow-hidden">
-                                <svg id="timeChart" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                                    <!-- 图表内容将通过JavaScript动态生成 -->
-                                    <text x="50%" y="50%" text-anchor="middle" class="chart-title">请计算数据以显示图表</text>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="noResultsMessage" class="py-12 text-center">
-                        <i class="fa fa-bar-chart text-gray-300 text-5xl mb-4"></i>
-                        <p class="text-gray-500">请输入参数并点击计算按钮</p>
-                    </div>
-                    
-                    <div id="errorMessage" class="hidden py-8 text-center text-red-500">
-                        <i class="fa fa-exclamation-triangle mb-2"></i>
-                        <p id="errorText"></p>
-                    </div>
+
+                <div class="chart-container">
+                    <svg id="timeChart"></svg>
                 </div>
-                
-                <!-- 查询区域 -->
-                <div class="bg-white rounded-xl p-6 card-shadow">
-                    <h2 class="text-xl font-semibold mb-6 text-primary flex items-center">
-                        <i class="fa fa-search mr-2"></i>任意时间查询
-                    </h2>
-                    
-                    <div id="queryContainer" class="space-y-4">
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <input 
-                                type="number" 
-                                id="queryTime" 
-                                step="any"
-                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg input-focus"
-                                placeholder="输入要查询的时间点（小时）"
-                                disabled
-                            >
-                            <button 
-                                id="queryButton" 
-                                class="bg-secondary text-white py-3 px-6 rounded-lg font-medium btn-hover flex items-center justify-center"
-                                disabled
-                            >
-                                <i class="fa fa-search mr-2"></i> 查询假时间
-                            </button>
+
+                <div class="query-section">
+                    <h3 class="card-title">查询特定时间的假时间</h3>
+                    <div class="query-group">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="queryTime">输入时间 (小时)</label>
+                            <input type="number" id="queryTime" step="0.01" disabled>
                         </div>
-                        
-                        <div id="queryResult" class="hidden p-4 rounded-lg bg-light">
-                            <p class="font-medium">查询结果：</p>
-                            <p id="queryResultText" class="mt-1"></p>
-                        </div>
-                        
-                        <div id="queryError" class="hidden p-4 rounded-lg bg-red-50 border border-red-100">
-                            <p class="text-red-600 flex items-center">
-                                <i class="fa fa-exclamation-circle mr-2"></i>
-                                <span id="queryErrorText"></span>
-                            </p>
-                        </div>
+                        <button id="queryButton" class="btn" style="flex-shrink: 0;" disabled>查询</button>
+                    </div>
+                    <div id="queryResult" class="query-result">
+                        <span id="queryResultText"></span>
+                    </div>
+                    <div id="queryError" class="query-error">
+                        <span id="queryErrorText"></span>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
+    <footer>
+        <div class="container footer-content">
+            <p>假时间计算器 &copy; 2023 - 离线版</p>
+        </div>
+    </footer>
+
     <!-- 帮助模态框 -->
-    <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
-        <div class="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto m-4">
-            <div class="p-6 border-b">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-primary">使用帮助</h2>
-                    <button id="closeHelpBtn" class="text-gray-500 hover:text-gray-700">
-                        <i class="fa fa-times text-xl"></i>
-                    </button>
-                </div>
+    <div id="helpModal" class="modal-overlay">
+        <div class="modal">
+            <h3 class="modal-title">使用帮助</h3>
+            <div class="modal-content">
+                <p>假时间计算器用于计算油气藏工程中的假时间参数，基于以下公式：</p>
+                <p>1. 计算 A = 1/(μ₉·Cₜ)</p>
+                <p>2. 计算时间间隔并转换为秒</p>
+                <p>3. 计算 B 值（A 值的平均值）</p>
+                <p>4. 计算 C' 值 = B·Δt(秒)</p>
+                <p>5. 假时间 tₐ 为 C' 值的累积和</p>
+                <p>使用方法：</p>
+                <p>1. 输入时间点、气体粘度和压缩系数，用空格分隔</p>
+                <p>2. 点击"计算假时间"按钮</p>
+                <p>3. 查看计算结果表格和图表</p>
+                <p>4. 可在结果区域查询特定时间点的假时间</p>
             </div>
-            <div class="p-6 space-y-4">
-                <div>
-                    <h3 class="font-semibold text-lg mb-2">输入格式</h3>
-                    <p>请输入空格分隔的数值序列，三个输入框的数值数量必须相同。</p>
-                    <p class="mt-1 text-sm text-gray-600">例如：时间点输入 "0 0.5 1 1.5"，表示4个时间点</p>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-lg mb-2">计算公式</h3>
-                    <ul class="list-disc pl-5 space-y-2">
-                        <li>A = 1/(μ_g * C_t)</li>
-                        <li>计算时间间隔并转换为秒</li>
-                        <li>B值为相邻A值的平均值（第一个B值为A(1)/2）</li>
-                        <li>C' = B * 时间间隔(秒)</li>
-                        <li>假时间为C'值的累加</li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-lg mb-2">查询功能</h3>
-                    <p>计算完成后，可以在查询区域输入任意时间点，系统会通过插值计算出对应的假时间。</p>
-                    <p class="mt-1 text-sm text-gray-600">注意：查询时间必须在输入的时间点范围内</p>
-                </div>
+            <div class="modal-close">
+                <button id="closeHelpBtn" class="btn">关闭</button>
             </div>
         </div>
     </div>
 
-    <footer class="bg-white border-t mt-12 py-6">
-        <div class="container mx-auto px-4 text-center text-neutral">
-            <p>假时间计算器 &copy; 2023</p>
-            <p class="text-sm mt-1">一个用于工程计算的工具</p>
-        </div>
-    </footer>
-
     <script>
-        // 全局变量存储计算结果
+        // 示例数据
+        const exampleData = {
+            timePoints: [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3],
+            gasViscosity: [0.0144, 0.01536, 0.01596, 0.01647, 0.01689, 0.01726, 0.01755, 0.01778, 0.01802, 0.01825, 0.01843, 0.01859, 0.01872],
+            compressibility: [0.1244, 0.0991, 0.08657, 0.07756, 0.072, 0.0675, 0.06431, 0.06189, 0.05943, 0.05724, 0.05557, 0.05412, 0.05302]
+        };
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            // 加载示例数据按钮事件
+            document.getElementById('loadExampleBtn').addEventListener('click', () => {
+                document.getElementById('timePoints').value = exampleData.timePoints.join(' ');
+                document.getElementById('gasViscosity').value = exampleData.gasViscosity.join(' ');
+                document.getElementById('compressibility').value = exampleData.compressibility.join(' ');
+            });
+        });
+
+        // 全局变量
         let calculationResults = null;
         
         // DOM元素
@@ -332,35 +641,30 @@
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
         const helpBtn = document.getElementById('helpBtn');
-        const mobileHelpBtn = document.getElementById('mobileHelpBtn');
         const helpModal = document.getElementById('helpModal');
         const closeHelpBtn = document.getElementById('closeHelpBtn');
         const themeToggle = document.getElementById('themeToggle');
-        const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const header = document.getElementById('header');
+        const loadExampleBtn = document.getElementById('loadExampleBtn');
         
         // 移动端菜单切换
         mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('show');
         });
         
         // 帮助模态框控制
         function openHelpModal() {
-            helpModal.classList.remove('hidden');
-            helpModal.classList.add('flex');
+            helpModal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
         
         function closeHelpModal() {
-            helpModal.classList.add('hidden');
-            helpModal.classList.remove('flex');
+            helpModal.style.display = 'none';
             document.body.style.overflow = '';
         }
         
         helpBtn.addEventListener('click', openHelpModal);
-        mobileHelpBtn.addEventListener('click', () => {
-            openHelpModal();
-            mobileMenu.classList.add('hidden');
-        });
         closeHelpBtn.addEventListener('click', closeHelpModal);
         
         // 点击模态框外部关闭
@@ -372,26 +676,17 @@
         
         // 主题切换
         themeToggle.addEventListener('click', toggleTheme);
-        mobileThemeToggle.addEventListener('click', () => {
-            toggleTheme();
-            mobileMenu.classList.add('hidden');
-        });
         
         function toggleTheme() {
-            document.body.classList.toggle('bg-gray-900');
-            document.body.classList.toggle('bg-gray-50');
-            document.body.classList.toggle('text-white');
-            document.body.classList.toggle('text-dark');
+            document.body.classList.toggle('dark-mode');
+            header.classList.toggle('dark-mode');
             
-            const isDark = document.body.classList.contains('bg-gray-900');
-            const themeIcon = themeToggle.querySelector('i');
+            const isDark = document.body.classList.contains('dark-mode');
             
             if (isDark) {
-                themeIcon.classList.remove('fa-moon-o');
-                themeIcon.classList.add('fa-sun-o');
+                themeIcon.textContent = '☀️';
             } else {
-                themeIcon.classList.remove('fa-sun-o');
-                themeIcon.classList.add('fa-moon-o');
+                themeIcon.textContent = '🌙';
             }
             
             // 如果图表已存在，更新主题
@@ -545,10 +840,10 @@
         // 显示计算结果
         function displayResults(results) {
             // 隐藏错误信息和无结果信息
-            errorMessage.classList.add('hidden');
-            noResultsMessage.classList.add('hidden');
+            errorMessage.style.display = 'none';
+            noResultsMessage.style.display = 'none';
             // 显示结果容器
-            resultsContainer.classList.remove('hidden');
+            resultsContainer.style.display = 'block';
             
             // 清空表格
             resultsTableBody.innerHTML = '';
@@ -556,7 +851,6 @@
             // 填充表格
             results.results.forEach((item, index) => {
                 const row = document.createElement('tr');
-                row.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
                 row.innerHTML = `
                     <td class="px-4 py-3 whitespace-nowrap">${item.t.toFixed(4)}</td>
                     <td class="px-4 py-3 whitespace-nowrap">${item.dt_h.toFixed(4)}</td>
@@ -734,16 +1028,26 @@
                 svg.appendChild(point);
             });
             
-            // 响应深色模式
-            if (document.body.classList.contains('bg-gray-900')) {
+            // 应用深色模式样式
+            if (document.body.classList.contains('dark-mode')) {
                 document.querySelectorAll('.chart-grid').forEach(el => {
-                    el.setAttribute('stroke', '#374151');
+                    el.classList.add('dark-mode');
                 });
                 document.querySelectorAll('.chart-axis').forEach(el => {
-                    el.setAttribute('stroke', '#6b7280');
+                    el.classList.add('dark-mode');
                 });
                 document.querySelectorAll('.chart-label, .chart-title').forEach(el => {
-                    el.setAttribute('fill', '#d1d5db');
+                    el.classList.add('dark-mode');
+                });
+            } else {
+                document.querySelectorAll('.chart-grid').forEach(el => {
+                    el.classList.remove('dark-mode');
+                });
+                document.querySelectorAll('.chart-axis').forEach(el => {
+                    el.classList.remove('dark-mode');
+                });
+                document.querySelectorAll('.chart-label, .chart-title').forEach(el => {
+                    el.classList.remove('dark-mode');
                 });
             }
         }
@@ -760,8 +1064,8 @@
             if (!calculationResults) return;
             
             // 隐藏之前的结果和错误
-            queryResult.classList.add('hidden');
-            queryError.classList.add('hidden');
+            queryResult.style.display = 'none';
+            queryError.style.display = 'none';
             
             // 获取查询时间
             const t_query = parseFloat(queryTimeInput.value);
@@ -814,7 +1118,7 @@
             
             // 显示查询结果
             queryResultText.textContent = `时间 ${t_query.toFixed(4)} 小时对应的假时间为: ${t_a_query.toFixed(4)}`;
-            queryResult.classList.remove('hidden');
+            queryResult.style.display = 'block';
             
             // 添加结果高亮动画
             queryResult.classList.add('animate-pulse');
@@ -826,9 +1130,9 @@
         // 显示错误信息
         function showError(message) {
             errorText.textContent = message;
-            errorMessage.classList.remove('hidden');
-            resultsContainer.classList.add('hidden');
-            noResultsMessage.classList.add('hidden');
+            errorMessage.style.display = 'block';
+            resultsContainer.style.display = 'none';
+            noResultsMessage.style.display = 'none';
             
             // 禁用查询功能
             queryTimeInput.disabled = true;
@@ -838,21 +1142,17 @@
         // 显示查询错误
         function showQueryError(message) {
             queryErrorText.textContent = message;
-            queryError.classList.remove('hidden');
+            queryError.style.display = 'block';
         }
         
         // 页面滚动效果 - 导航栏样式变化
         window.addEventListener('scroll', () => {
-            const header = document.querySelector('header');
             if (window.scrollY > 10) {
-                header.classList.add('py-2');
-                header.classList.remove('py-4');
+                header.style.padding = '0.5rem 0';
             } else {
-                header.classList.add('py-4');
-                header.classList.remove('py-2');
+                header.style.padding = '1rem 0';
             }
         });
     </script>
 </body>
 </html>
-    
